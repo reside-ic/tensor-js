@@ -1,10 +1,4 @@
-/**
- * Add two numbers
- *
- * @param a First number
- *
- * @param b Second number
- */
-export function add(a: number, b: number) {
-    return a + b;
-}
+export {TensorBase} from "./tensor";
+export {Matrix} from "./matrix";
+export {Vector} from "./vector";
+export {VectorView} from "./vector-view";

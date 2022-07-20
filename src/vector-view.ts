@@ -1,4 +1,4 @@
-import {TensorBase} from "./tensor";
+import {Tensor} from "./tensor";
 
 export class VectorView<T> {
     public readonly data: T[];
@@ -33,5 +33,13 @@ export class VectorView<T> {
 
     public dim() {
         return [this._length];
+    }
+
+    public toArray() {
+        const ret = new Array(this._length);
+        for (let i = 0, j = this._offset; i < this._length; ++i, j += this._stride) {
+            ret[i] = this.data[j];
+        }
+        return ret;
     }
 }

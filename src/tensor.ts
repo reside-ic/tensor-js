@@ -1,54 +1,50 @@
-// export interface Tensor<T> {
-//     public readonly data: T[];
-//     public dim(): readonly number[];
-//     public length(): number;
-//     public fill(value: T): void;
-// }
+import {prod} from "./util";
 
-function prod(x: number[]) {
-    return x.reduce((a: number, b: number) => a * b, 1);
-}
-
-type Predicate<T> = (x: T) => boolean;
-
-
-export abstract class TensorBase<T> {
+// This is our base "dense" tensor. The data may be "owned" by the
+// tensor or not
+export class Tensor<T> {
     public readonly data: T[];
     public readonly dim: readonly number[];
-    public readonly length: number;
     public readonly rank: number;
-    protected readonly offset: number[];
+    public readonly offset: number;
+    public readonly stride: number[];
+    private readonly _length: number;
 
     protected index(i: number[]) {
         if (i.length !== this.dim.length) {
             throw Error("Incorrect dimension");
         }
-        let ret = i[0];
-        for (let j = 1; j < this.rank; ++j) {
-            ret += i[j] * this.offset[j - 1];
+        let ret = this.offset;
+        for (let j = 0; j < this.rank; ++j) {
+            ret += i[j] * this.stride[j];
         }
         return ret;
     }
 
-    constructor(data: T | T[], dim: number[]) {
+    constructor(data: T[], dim: number[], stride?: number[], offset?: number) {
         this.dim = dim;
         this.rank = dim.length;
-        this.offset = dim.slice();
-        for (let i = 1; i < this.rank; ++i) {
-            this.offset[i] *= this.offset[i - 1];
-        }
-        this.length = this.offset[this.rank - 1];
-        // not an ideal check - we really want typeof data === T
-        if (Array.isArray(data)) {
-            if (data.length !== this.length) {
-                throw Error("Incorrect length data");
-            }
-            this.data = data; // Note: does not copy
+        this.offset = offset ? offset : 0;
+        if (stride) {
+            this.stride = stride;
         } else {
-            this.data = Array(this.length).fill(data);
+            this.stride = dim.slice();
+            this.stride[0] = 1;
+            for (let i = 1; i < this.rank; ++i) {
+                this.stride[i] = this.stride[i - 1] * this.dim[i - 1];
+            }
         }
+        this._length = prod(dim);
+        if (data.length !== this._length) {
+            throw Error("Incorrect length data");
+        }
+        this.data = data; // Note: does not copy
     }
-    
+
+    public length() {
+        return this._length;
+    }
+
     public fill(value: T) {
         this.data.fill(value);
     }
@@ -61,13 +57,6 @@ export abstract class TensorBase<T> {
         this.data[this.index(i)] = value;
     }
 
-    // public map(f: any): this {
-    //     return new this(this.data.map(f), this.dim)
-    // }
-    
-    // map - type it?
-    // forEach - probably ok
-
     public every(f: (x: T) => boolean) {
         return this.data.some(f);
     }
@@ -79,12 +68,9 @@ export abstract class TensorBase<T> {
     public includes(el: T) {
         return this.data.includes(el);
     }
-
-    // find - possibly weird in >=2d
-    // findIndex - possibly weird in >=2d
-    // indexOf
-
-    // sort - makes no sense except for 1d structures    
-    // reduce - 1d only
-    // reverse - 1d only
 }
+
+// In 1d we can implement find, findIndex, indexOf, sort, and reverse
+// it's possible the reduce makes sense (apply)
+//
+// map and forEach need doing but need to work out return types properly

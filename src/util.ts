@@ -5,3 +5,7 @@ export function prod(x: number[]) {
 export function seq(n: number) {
     return Array(n).fill(1).map((_, i) => i);
 }
+
+export function zeros(n: number) {
+    return Array(n).fill(0);
+}

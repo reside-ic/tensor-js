@@ -4,7 +4,7 @@ import { seq, zeros } from "../src/util";
 describe("matrix", () => {
     it("can construct a matrix of numbers", () => {
         const m = new Matrix(zeros(15), 3, 5);
-        expect(m.dim).toEqual([3, 5]);
+        expect(m.dim()).toEqual([3, 5]);
         expect(m.data).toEqual(zeros(15));
     });
 

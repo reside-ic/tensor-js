@@ -27,6 +27,15 @@ export class Matrix<T> extends Tensor<T> {
         this.checkIndex(i, j);
         this.data[i + j * this.nr] = value;
     }
+
+    /** Suppose you have a matrix, and you want to copy it out as a 
+     * json-style array of arrays:
+     * {
+     *   "col1": [1, 2, ...]
+     *   "col2": [2, 3, ...]
+     * }
+     */
+    
     
     public toArray(mode: boolean): T[][] {
         const ret = [];
@@ -44,12 +53,6 @@ export class Matrix<T> extends Tensor<T> {
 
     public copyData(): T[] {
         return this.data.slice();
-    }
-
-    private checkIndex(i: number, j: number) {
-        if (i >= this.nr || j >= this.nc) {
-            throw Error("Out of bounds");
-        }        
     }
 
     // public col(j: number) {
